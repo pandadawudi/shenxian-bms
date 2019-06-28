@@ -3,9 +3,9 @@ server:
 
 spring:
   datasource:
-    url: jdbc:mysql://172.16.0.25:5506/db_resource_center?useUnicode=true&characterEncoding=utf8&useSSL=false
-    username: ziyuan
-    password: ziyuan@962540
+    url: jdbc:mysql://114.55.170.140:3306/xiuxian_bms?useUnicode=true&characterEncoding=utf8&useSSL=false
+    username: panjin
+    password: 123456
     driver-class-name: com.mysql.jdbc.Driver
 
   jpa:
@@ -14,5 +14,29 @@ spring:
     show-sql: true
     database: mysql
 
+  redis:
+    host: 114.55.170.140
+    port: 6379
+    password: 123456
+    jedis:
+      pool:
+        max-active: 8
+        max-idle: 8
+        max-wait: -1
+        min-idle: 0
+    timeout: 2000
+    default-exp: 1
+
+    keyId: redisId
+    delta: 1
+
+
+
 mybatis:
-  mapper-locations: classpath:mybatis/mapping/*DAO.xml
+  mapper-locations: classpath:mybatis/mapper/*Mapper.xml
+
+#雪花算法配置的当前机器ID和序列号
+snow:
+  worker:
+    workerId: 1
+    dataCenterId: 1
