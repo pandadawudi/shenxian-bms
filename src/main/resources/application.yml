@@ -30,7 +30,20 @@ spring:
     keyId: redisId
     delta: 1
 
+  thymeleaf:
+    content-type: text/html
+    encoding: UTF-8
+    cache: false
+    mode: HTML5
+    prefix: classpath:/templates/
+    suffix: .html
 
+  resources:
+    chain:
+      strategy:
+        content:
+          enabled: true
+          paths: /**
 
 mybatis:
   mapper-locations: classpath:mybatis/mapper/*Mapper.xml
