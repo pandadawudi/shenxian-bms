@@ -21,13 +21,35 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class BaseUserController {
 
     /**
-     * 测试登陆
+     * 登录页面
      *
      * @return
      * @throws
      */
-    @RequestMapping(value = "test.do", method = RequestMethod.GET)
-    public String index(){
-        return "index";
+    @RequestMapping(value = "login.html", method = RequestMethod.GET)
+    public String login(){
+        return "login";
+    }
+
+    /**
+     * 注册页面
+     *
+     * @return
+     * @throws
+     */
+    @RequestMapping(value = "register.html", method = RequestMethod.GET)
+    public String register(){
+        return "register";
+    }
+
+    /**
+     * 主页面
+     *
+     * @return
+     * @throws
+     */
+    @RequestMapping(value = "main.html", method = RequestMethod.GET)
+    public String main(){
+        return "main";
     }
 }
