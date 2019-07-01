@@ -31,12 +31,13 @@ spring:
     delta: 1
 
   thymeleaf:
-    content-type: text/html
     encoding: UTF-8
     cache: false
     mode: HTML5
     prefix: classpath:/templates/
     suffix: .html
+    servlet:
+      content-type: text/html
 
   resources:
     chain:

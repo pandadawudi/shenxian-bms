@@ -1,5 +1,9 @@
-$(function(){
-	
+layui.use(['layer', 'form', 'element','jquery'], function(){
+	var layer = layui.layer,
+		form = layui.form,
+		element = layui.element;
+	var $ = layui.$
+
 	//登录输入框效果
 	$('.form_text_ipt input').focus(function(){
 		$(this).parent().css({
@@ -10,28 +14,49 @@ $(function(){
 		$(this).parent().css({
 			'box-shadow':'none',
 		});
-		//$(this).parent().next().hide();
+
 	});
-	
-	//表单验证
-	$('.form_text_ipt input').bind('input propertychange',function(){
-		if($(this).val()==""){
-			$(this).css({
+
+	function checkInput(e){
+		if(e.val()==""){
+			e.css({
 				'color':'red',
 			});
-			$(this).parent().css({
+			e.parent().css({
 				'border':'solid 1px red',
 			});
-			//$(this).parent().next().find('span').html('helow');
-			$(this).parent().next().show();
+			e.parent().next().show();
+			return false;
 		}else{
-			$(this).css({
+			e.css({
 				'color':'#ccc',
 			});
-			$(this).parent().css({
+			e.parent().css({
 				'border':'solid 1px #ccc',
 			});
-			$(this).parent().next().hide();
+			e.parent().next().hide();
+			return true;
 		}
+	}
+
+	//监听提交
+	form.on('submit(formSubmit)', function(data){
+		var userName = $("[name='username']");
+		var password = $("[name='password']");
+		if(!checkInput(userName)){
+			return;
+		}
+		if(!checkInput(password)){
+			return;
+		}
+		var submitUrl = "/login/doLogin.do";
+		$.ajax({
+			url: submitUrl,
+			type: "GET",
+			data: {userName: userName.val(), password: password.val()},
+			success: function (data) {
+				layer.msg("登陆成功");
+			}
+		});
 	});
 });

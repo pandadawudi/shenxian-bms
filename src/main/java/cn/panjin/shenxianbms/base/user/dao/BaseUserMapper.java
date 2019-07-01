@@ -46,4 +46,9 @@ public interface BaseUserMapper {
      * @mbggenerated
      */
     int updateByPrimaryKey(BaseUser record);
+
+    /**
+     * 用登陆账户查询人员信息
+     */
+    BaseUser getUserByLoginName(String loginName);
 }
