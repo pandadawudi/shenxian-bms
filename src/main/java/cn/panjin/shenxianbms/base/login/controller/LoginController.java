@@ -1,10 +1,16 @@
 package cn.panjin.shenxianbms.base.login.controller;
 
+import cn.panjin.shenxianbms.base.login.service.LoginService;
+import cn.panjin.shenxianbms.tool.web.WebResult;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * <p>
@@ -20,6 +26,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequestMapping("/login/")
 @Slf4j
 public class LoginController {
+
+    @Autowired
+    private LoginService loginService;
 
     /**
      * 跳转登录页面
@@ -49,10 +58,34 @@ public class LoginController {
      * @return
      * @throws
      */
-    @RequestMapping(value = "doLogin.do", method = RequestMethod.GET)
-    public String doLogin(@RequestParam String userName, @RequestParam String password){
+    @RequestMapping(value = "doLogin.do", method = RequestMethod.POST)
+    @ResponseBody
+    public WebResult doLogin(@RequestParam String userName, @RequestParam String password, HttpServletRequest request){
+        return loginService.doLogin(userName,password,request);
+    }
 
+    /**
+     * 注册
+     *
+     * @return
+     * @throws
+     */
+    @RequestMapping(value = "doRegister.do", method = RequestMethod.POST)
+    @ResponseBody
+    public WebResult doRegister(@RequestParam String userName, @RequestParam String password,
+                                @RequestParam String realName, @RequestParam String phone,
+                                @RequestParam String email, @RequestParam String sex){
+        return loginService.doRegister(userName,password,realName,phone,email,sex);
+    }
 
-        return "register";
+    /**
+     * 主页面
+     *
+     * @return
+     * @throws
+     */
+    @RequestMapping(value = "main.html", method = RequestMethod.GET)
+    public String main(){
+        return "main";
     }
 }

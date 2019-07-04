@@ -91,4 +91,10 @@
     description, creater_id, creater_name, create_time, updater_id, updater_name, update_time
     from base_user
   </select>
+  <select id="getUserByLoginName" resultMap="BaseResultMap" >
+    select id, login_name, `password`, locked, state_type, real_name, phone, sex, email,
+    description, creater_id, creater_name, create_time, updater_id, updater_name, update_time
+    from base_user
+    where login_name = #{loginName,jdbcType=VARCHAR}
+  </select>
 </mapper>
