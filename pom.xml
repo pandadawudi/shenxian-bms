@@ -38,6 +38,15 @@
             <artifactId>mysql-connector-java</artifactId>
             <scope>runtime</scope>
         </dependency>
+
+        <!--分页插件-->
+        <dependency>
+            <groupId>com.github.pagehelper</groupId>
+            <artifactId>pagehelper</artifactId>
+            <version>4.1.6</version>
+        </dependency>
+        <!--分页插件-->
+
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -76,7 +85,6 @@
             <artifactId>jackson-core</artifactId>
         </dependency>
         <!--redis结束-->
-
 
         <dependency>
             <groupId>com.alibaba</groupId>

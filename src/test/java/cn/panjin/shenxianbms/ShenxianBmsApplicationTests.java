@@ -2,6 +2,7 @@ package cn.panjin.shenxianbms;
 
 import cn.panjin.shenxianbms.base.user.dao.BaseUserMapper;
 import cn.panjin.shenxianbms.base.user.entity.BaseUser;
+import cn.panjin.shenxianbms.mytest.service.MyTestService;
 import cn.panjin.shenxianbms.tool.id.UuidWorker;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,13 +27,15 @@ public class ShenxianBmsApplicationTests {
     @Resource
     private BaseUserMapper baseUserMapper;
 
+    @Autowired
+    private MyTestService myTestService;
+
     @Test
     public void contextLoads() {
     }
 
     @Test
     public void getIdTest(){
-        System.out.println("e");
-        System.out.println("df");
+        myTestService.testTransactional6();
     }
 }
