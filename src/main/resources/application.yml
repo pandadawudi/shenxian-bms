@@ -24,7 +24,7 @@ spring:
         max-idle: 8
         max-wait: -1
         min-idle: 0
-    timeout: 2000
+    timeout: 60000
     default-exp: 1
 
     keyId: redisId

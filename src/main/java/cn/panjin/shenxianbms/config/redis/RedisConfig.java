@@ -1,5 +1,6 @@
 package cn.panjin.shenxianbms.config.redis;
 
+import cn.panjin.shenxianbms.redis.publishsubscribe.Receiver;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,8 +15,9 @@ import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import com.alibaba.fastjson.JSON;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.listener.PatternTopic;
+import org.springframework.data.redis.listener.RedisMessageListenerContainer;
+import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.RedisSerializer;
@@ -23,6 +25,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import java.lang.reflect.Method;
 import java.time.Duration;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * <p>
@@ -79,11 +82,11 @@ public class RedisConfig extends CachingConfigurerSupport {
         // 生成一个默认配置，通过config对象即可对缓存进行自定义配置
         RedisSerializer<String> redisSerializer = new StringRedisSerializer();
         // 使用Jackson2JsonRedisSerializer来序列化和反序列化redis的value值
-        Jackson2JsonRedisSerializer<JSON> serializer = new Jackson2JsonRedisSerializer<JSON>(JSON.class);
+        Jackson2JsonRedisSerializer jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer(Object.class);
         // 配置序列化
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig();
         config.serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(redisSerializer));
-        config.serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(serializer));
+        config.serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(jackson2JsonRedisSerializer));
         // 设置缓存的默认过期时间
         config.entryTtl(Duration.ofSeconds(exps));
         // 不缓存空值
@@ -103,16 +106,47 @@ public class RedisConfig extends CachingConfigurerSupport {
         RedisTemplate<Object, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory);
         // 使用Jackson2JsonRedisSerializer来序列化和反序列化redis的value值
-        Jackson2JsonRedisSerializer<JSON> serializer = new Jackson2JsonRedisSerializer<JSON>(JSON.class);
+        Jackson2JsonRedisSerializer jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer(Object.class);
         ObjectMapper mapper = new ObjectMapper();
         mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
         mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
-        serializer.setObjectMapper(mapper);
-        template.setValueSerializer(serializer);
-        template.setHashValueSerializer(serializer);
+        jackson2JsonRedisSerializer.setObjectMapper(mapper);
+        template.setValueSerializer(jackson2JsonRedisSerializer);
+        template.setHashValueSerializer(jackson2JsonRedisSerializer);
         // 使用StringRedisSerializer来序列化和反序列化redis的key值
         template.setKeySerializer(new StringRedisSerializer());
         template.afterPropertiesSet();
         return template;
+    }
+
+    /**
+     * 配置redis发布订阅消息监听
+     */
+    @Bean
+    public RedisMessageListenerContainer container(RedisConnectionFactory redisConnectionFactory, MessageListenerAdapter patternTopicTestAdapter){
+        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
+        container.setConnectionFactory(redisConnectionFactory);
+        container.addMessageListener(patternTopicTestAdapter, new PatternTopic("patternTopicTest"));
+        return container;
+    }
+
+    /**
+     * 利用反射来创建监听到消息之后的执行方法
+     * @param receiver
+     * @return
+     */
+    @Bean
+    public MessageListenerAdapter listenerAdapter(Receiver receiver) {
+        return new MessageListenerAdapter(receiver, "receiveMessage");
+    }
+
+    @Bean
+    public Receiver receiver(CountDownLatch countDownLatch) {
+        return new Receiver(countDownLatch);
+    }
+
+    @Bean
+    public CountDownLatch latch() {
+        return new CountDownLatch(1);
     }
 }
