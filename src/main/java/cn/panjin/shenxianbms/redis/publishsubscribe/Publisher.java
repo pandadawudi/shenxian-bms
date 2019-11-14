@@ -32,7 +32,7 @@ public class Publisher {
      * 发布消息
      */
     public void sendMessage() throws InterruptedException {
-        redisTemplate.convertAndSend("patternTopicTest", "what's your problem");
+        redisTemplate.convertAndSend("patternTopicTest11", "what's your problem");
         countDownLatch.await();
     }
 }

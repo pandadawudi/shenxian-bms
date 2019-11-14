@@ -1,6 +1,7 @@
 package cn.panjin.shenxianbms.config.redis;
 
 import cn.panjin.shenxianbms.redis.publishsubscribe.Receiver;
+import cn.panjin.shenxianbms.redis.publishsubscribe.ReceiverOther;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,6 +16,7 @@ import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.PatternTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
@@ -120,18 +122,23 @@ public class RedisConfig extends CachingConfigurerSupport {
     }
 
     /**
-     * 配置redis发布订阅消息监听
+     * 配置redis发布订阅消息监听容器
      */
     @Bean
-    public RedisMessageListenerContainer container(RedisConnectionFactory redisConnectionFactory, MessageListenerAdapter patternTopicTestAdapter){
+    public RedisMessageListenerContainer container(RedisConnectionFactory redisConnectionFactory,
+                                                   MessageListenerAdapter listenerAdapter,
+                                                   MessageListenerAdapter listenerAdapterOther){
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(redisConnectionFactory);
-        container.addMessageListener(patternTopicTestAdapter, new PatternTopic("patternTopicTest"));
+        container.addMessageListener(listenerAdapter, new PatternTopic("patternTopicTest*"));
+        container.addMessageListener(listenerAdapterOther, new ChannelTopic("patternTopicTest"));
         return container;
     }
 
     /**
      * 利用反射来创建监听到消息之后的执行方法
+     * Receiver为消息接收类
+     * receiveMessage即为消息接收器中的接收方法
      * @param receiver
      * @return
      */
@@ -141,12 +148,17 @@ public class RedisConfig extends CachingConfigurerSupport {
     }
 
     @Bean
-    public Receiver receiver(CountDownLatch countDownLatch) {
-        return new Receiver(countDownLatch);
-    }
-
-    @Bean
     public CountDownLatch latch() {
         return new CountDownLatch(1);
+    }
+
+    /**
+     *测试多个接收器
+     *
+     * 由于MessageListenerAdapter是通过反射机制获取监听方法名称和参数，所以监听的方法必须公有  参数不能为空 否则不能启动
+     */
+    @Bean
+    public MessageListenerAdapter listenerAdapterOther(ReceiverOther receiverOther) {
+        return new MessageListenerAdapter(receiverOther, "receiveMessageOther");
     }
 }

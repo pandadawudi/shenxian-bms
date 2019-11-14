@@ -3,6 +3,7 @@ package cn.panjin.shenxianbms.redis.publishsubscribe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.concurrent.CountDownLatch;
 
@@ -17,6 +18,7 @@ import java.util.concurrent.CountDownLatch;
  * @Date 2019/7/26 0026 16:02
  * @Version 1.0
  */
+@Component
 public class Receiver {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Receiver.class);
