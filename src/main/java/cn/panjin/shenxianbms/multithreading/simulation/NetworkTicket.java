@@ -10,12 +10,12 @@ public class NetworkTicket implements Runnable {
     @Override
     public void run() {
         // 模拟卖票
-        while (true) {
+        while (ticket > 0) {
             synchronized(o){
                 if (ticket > 0) {
                     // 模拟选坐的操作
                     try {
-                        Thread.sleep(1);
+                        Thread.sleep(10);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
