@@ -38,7 +38,7 @@
 
         <!--数据库链接URL，用户名、密码 -->
         <jdbcConnection driverClass="com.mysql.jdbc.Driver" connectionURL="jdbc:mysql://114.55.170.140:3306/xiuxian_bms"
-                        userId="panjin" password="123456">
+                        userId="root" password="Qiudaoyu1100,">
         </jdbcConnection>
         <!-- 类型转换 -->
         <javaTypeResolver>
@@ -47,20 +47,20 @@
         </javaTypeResolver>
 
         <!-- 生成实体类地址 -->
-        <javaModelGenerator targetPackage="cn.panjin.shenxianbms.base.role.entity" targetProject="src/main/java" >
+        <javaModelGenerator targetPackage="cn.panjin.shenxianbms.application.multithreading.entity" targetProject="src/main/java" >
             <property name="enableSubPackages" value="false"/>
             <property name="trimStrings" value="true"/>
         </javaModelGenerator>
         <!-- 生成mapxml文件 -->
-        <sqlMapGenerator targetPackage="mybatis.mapper" targetProject="src/main/resources" >
+        <sqlMapGenerator targetPackage="mybatis.mapper.multithreading" targetProject="src/main/resources" >
             <property name="enableSubPackages" value="false" />
         </sqlMapGenerator>
         <!-- 生成mapxml对应client，也就是接口dao -->
-        <javaClientGenerator targetPackage="cn.panjin.shenxianbms.base.role.dao" targetProject="src/main/java" type="XMLMAPPER" >
+        <javaClientGenerator targetPackage="cn.panjin.shenxianbms.application.multithreading.mapper" targetProject="src/main/java" type="XMLMAPPER" >
             <property name="enableSubPackages" value="false" />
         </javaClientGenerator>
         <!-- table可以有多个,每个数据库中的表都可以写一个table，tableName表示要匹配的数据库表,也可以在tableName属性中通过使用%通配符来匹配所有数据库表,只有匹配的表才会自动生成文件 -->
-        <table tableName="base_role" enableCountByExample="true" enableUpdateByExample="true" enableDeleteByExample="true" enableSelectByExample="true" selectByExampleQueryId="true">
+        <table tableName="bms_operation_record" enableCountByExample="true" enableUpdateByExample="true" enableDeleteByExample="true" enableSelectByExample="true" selectByExampleQueryId="true">
             <!--Mybatis自动生成Xml文件，针对字段类型为text等会默认产生XXXXWithBlobs的方法问题-->
             <!--<columnOverride column="sp_area_code" jdbcType="VARCHAR" />-->
             <!--<columnOverride column="sp_area_name" jdbcType="VARCHAR" />-->
