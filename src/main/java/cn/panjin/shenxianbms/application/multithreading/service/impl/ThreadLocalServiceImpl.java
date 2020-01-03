@@ -1,6 +1,8 @@
 package cn.panjin.shenxianbms.application.multithreading.service.impl;
 
+import cn.panjin.shenxianbms.application.multithreading.component.ThreadLocalUserSession;
 import cn.panjin.shenxianbms.application.multithreading.service.ThreadLocalService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -16,5 +18,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class ThreadLocalServiceImpl implements ThreadLocalService {
 
+    @Autowired
+    private ThreadLocalUserSession threadLocalUserSession;
 
+    /**
+     * ThreadLocal测试方法
+     */
+    @Override
+    public void doTest() {
+        System.out.println(Thread.currentThread().getId());
+        threadLocalUserSession.dataIsolationTest();
+    }
 }

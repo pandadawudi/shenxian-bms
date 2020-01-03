@@ -100,4 +100,11 @@ public class SynchronizedSellingTickets {
             sellingTickets();
         }
     }
+
+    /**
+     * 打印
+     */
+    public void printWord(){
+        System.out.println("cao");
+    }
 }

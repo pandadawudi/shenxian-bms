@@ -2,14 +2,14 @@ package cn.panjin.shenxianbms.application.multithreading.service;
 
 /**
  * <p>
- * ThreadLocal学习接口
+ * Volatile关键字学习
  * </p>
  *
  * @Anthor panjin
  * @Description
- * @Date 2019/12/27 0027 14:52
+ * @Date 2019/12/30 0030 19:22
  * @Version 1.0
  */
-public interface ThreadLocalService {
-    void doTest();
+public interface VolatileService {
+    void volatileTest();
 }

@@ -129,4 +129,23 @@ public class SynchronizedSimulationServiceImpl implements SynchronizedSimulation
         }
 
     }
+
+    /**
+     * 测试Synchronized锁住类，类的非Synchronized的方法能被调用？
+     *
+     * 结果：不能
+     *
+     * cao不是瞬间就打印，而是慢慢打印
+     */
+    public void test3() {
+        for (int i = 0; i < 50; i++) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    multithreadingSellingTickets.lockClass();
+                    multithreadingSellingTickets2.printWord();
+                }
+            }).start();
+        }
+    }
 }
