@@ -43,6 +43,15 @@ public class Singleton {
      * 强制将线程工作内存中值的修改刷新至主内存中
      * 如果是写操作，则会导致其他线程工作内存(CPU Cache)中的缓存数据失效
      *
+     * Person p = new Person();那么我们的Jit编译器会怎样操作呢？会分为以下三个子操作，
+     * ①.分配Person实例所需要的内存空间;
+     * objRef = allocate(Person.class);（推荐大家看一下Java反射机制，很重要的很基础的很...有用的=@=）
+     * ②.调用Person的构造方法初始化objRef引用指向一个Person实例;
+     * invokeConstructor(objRef);
+     * ③.将Person实例引用objRef赋值给实例变量p；
+     * p = objRef;
+     *
+     *
      * 如下是 happens-before 的8条原则，摘自 《深入理解Java虚拟机》。
      * 程序次序规则：一个线程内，按照代码顺序，书写在前面的操作先行发生于书写在后面的操作；
      * 锁定规则：一个 unLock（解锁） 操作先行发生于后面对同一个锁的 lock 操作；
