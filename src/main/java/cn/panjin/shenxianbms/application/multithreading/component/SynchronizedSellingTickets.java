@@ -1,9 +1,8 @@
 package cn.panjin.shenxianbms.application.multithreading.component;
 
-import cn.panjin.shenxianbms.application.multithreading.dao.BmsOperationRecordMapper;
-import cn.panjin.shenxianbms.application.multithreading.entity.BmsOperationRecord;
-import cn.panjin.shenxianbms.tool.id.SnowWorker;
+import cn.panjin.shenxianbms.application.multithreading.service.OperationRecordService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,37 +20,47 @@ import javax.annotation.Resource;
  * @Version 1.0
  */
 @Component
+@Scope("prototype")
 public class SynchronizedSellingTickets {
 
-    @Autowired
-    private RedisTemplate redisTemplate;
-
     @Resource
-    private BmsOperationRecordMapper bmsOperationRecordMapper;
+    private RedisTemplate<String, Integer> redisTemplate;
 
     @Autowired
-    private SnowWorker snowWorker;
+    private OperationRecordService operationRecordService;
+
+
+    private static Integer ticketNumber = 15;
 
 
     /**
-     * synchronized关键字学习
+     * 加synchronized关键字的同步方法
      *
-     * 对象锁
      *
-     * MultithreadingServiceImpl的含有synchronized关键字方法
-     *
-     * 模拟A个人同时买火车票，有B个窗口售票，仅存C张火车票
+     * 模拟A个人同时买火车票，仅存B张火车票
      */
     public synchronized void sellingTicketsYes(){
         sellingTickets();
     }
 
+    public synchronized void sellingTicketsYesTwo(){
+        sellingTickets();
+    }
+
     /**
-     * 如果不加synchronized关键字
+     * 不加synchronized关键字的普通方法
      */
     public void sellingTicketsNo(){
         sellingTickets();
     }
+
+    /**
+     * 静态synchronized关键字同步方法
+     */
+    public static synchronized void sellingTicketStatic(){
+        simulation();
+    }
+
 
     /**
      * 方法
@@ -62,18 +71,16 @@ public class SynchronizedSellingTickets {
         int ticketNum = num == null ? 0 : (int) num;
         //获取线程名称
         String threadName = Thread.currentThread().getName();
-        BmsOperationRecord bmsOperationRecord = new BmsOperationRecord();
-        bmsOperationRecord.setId(snowWorker.nextId());
-        bmsOperationRecord.setObjectId(1L);
-        bmsOperationRecord.setOperationType(1);
+        int count = 0;
         if(ticketNum >= 1){
             ticketNum = ticketNum - 1;
-            bmsOperationRecord.setOperationContent(threadName + "获得一张火车票，剩余：" + (ticketNum) + "张");
+            count = operationRecordService.addOperationRecord(1L, 66,
+                    threadName + "获得一张火车票，剩余：" + (ticketNum) + "张");
         }else {
-            bmsOperationRecord.setOperationContent(threadName + "来晚了，已经没有火车票了");
+            operationRecordService.addOperationRecord(1L, 67,
+                    threadName + "来晚了，已经没有火车票了");
         }
-        int i = bmsOperationRecordMapper.insert(bmsOperationRecord);
-        if(i == 1){
+        if(count == 1){
             redisTemplate.opsForValue().set("ticketNum", ticketNum);
         }
     }
@@ -82,14 +89,19 @@ public class SynchronizedSellingTickets {
      * 该方法用于测试当前实例被锁住时，能否调用非synchronized修饰的方法
      */
     public void noSynchronized(){
-        String threadName = Thread.currentThread().getName();
-        BmsOperationRecord bmsOperationRecord = new BmsOperationRecord();
-        bmsOperationRecord.setId(snowWorker.nextId());
-        bmsOperationRecord.setObjectId(2L);
-        bmsOperationRecord.setOperationType(2);
-        bmsOperationRecord.setOperationContent(threadName + "正在运行~~~");
-        bmsOperationRecordMapper.insert(bmsOperationRecord);
-        //System.out.println("wodetian");
+        simulation();
+    }
+
+    /**
+     * 模拟
+     */
+    public static void simulation(){
+        if(ticketNumber > 0){
+            ticketNumber = ticketNumber - 1;
+            System.out.println(Thread.currentThread().getId() + "买了一张票，还剩" + ticketNumber + "张");
+        }else {
+            System.out.println("没票了~~");
+        }
     }
 
     /**
@@ -102,9 +114,13 @@ public class SynchronizedSellingTickets {
     }
 
     /**
-     * 打印
+     * 抛出异常测试锁
      */
     public void printWord(){
-        System.out.println("cao");
+        System.out.println(Thread.currentThread().getName() + "进入了方法。");
+        synchronized (SynchronizedSellingTickets.class){
+            System.out.println(Thread.currentThread().getName() + "获取到锁！");
+            throw new RuntimeException("抛出一个异常~~");
+        }
     }
 }
