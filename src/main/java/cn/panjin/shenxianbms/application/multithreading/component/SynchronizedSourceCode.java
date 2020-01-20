@@ -1,5 +1,7 @@
 package cn.panjin.shenxianbms.application.multithreading.component;
 
+import java.util.Optional;
+
 /**
  * <p>
  * Synchronized关键字源码class
@@ -11,15 +13,12 @@ package cn.panjin.shenxianbms.application.multithreading.component;
  * @Version 1.0
  */
 public class SynchronizedSourceCode {
-
-    private int panjin = 999;
-
     /**
      * 测试方法
      */
     public void test(){
         synchronized (this){
-            System.out.println("查看字节码文件");
+            System.out.println("这是一段同步代码");
         }
     }
 }
