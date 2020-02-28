@@ -52,7 +52,7 @@ public interface SpcSourceDataMapper {
 
     List<SpcSourceData> getSourceDataByStatus(@Param("dataStatus") Integer dataStatus );
 
-    List<SpcSourceData> getSourceDataByIds(@Param("ids") String ids);
+    List<SpcSourceData> getSourceDataByIds(String[] idsArr);
 
     /**
      * 直接执行SQL

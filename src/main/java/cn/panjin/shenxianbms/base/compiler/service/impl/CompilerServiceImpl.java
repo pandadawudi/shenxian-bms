@@ -69,8 +69,9 @@ public class CompilerServiceImpl implements CompilerService {
      * @param dataArr      选择的源数据ID
      */
     public Class<?> structureCompile(String textareaData, String dataArr) {
+        String[] idArr = dataArr.split(",");
         //根据ID集合获取所有节点
-        List<SpcSourceData> list = spcSourceDataMapper.getSourceDataByIds(dataArr);
+        List<SpcSourceData> list = spcSourceDataMapper.getSourceDataByIds(idArr);
         //将中文名字置换为英文名字，作为参数
         ParamsListVO paramsListVO = replaceCode(list, textareaData);
         String codes = eval.structureFunction(paramsListVO);
@@ -90,8 +91,9 @@ public class CompilerServiceImpl implements CompilerService {
      */
     @Override
     public WebResult calculationThisUser(String textareaData, String dataArr, Long userId) {
+        String[] idArr = dataArr.split(",");
         //根据ID集合获取所有节点
-        List<SpcSourceData> list = spcSourceDataMapper.getSourceDataByIds(dataArr);
+        List<SpcSourceData> list = spcSourceDataMapper.getSourceDataByIds(idArr);
         //将中文名字置换为英文名字，作为参数
         ParamsListVO paramsListVO = replaceCode(list, textareaData);
         String codes = eval.structureFunction(paramsListVO);

@@ -32,8 +32,9 @@ public class Eval {
         }
         if(!CollectionUtils.isEmpty(list)){
             for(ParamsVO paramsVO : list){
-                head = head + paramsVO.getParamType() + " " + paramsVO.getParamName();
+                head = head + paramsVO.getParamType() + " " + paramsVO.getParamName() + ",";
             }
+            head = head.substring(0, head.length() - 1);
         }
         return head + "){" + code + "}";
     }
@@ -93,7 +94,7 @@ public class Eval {
             // 调用方法
             Method m = clazz.getDeclaredMethod(method, args);
             invoke = m.invoke(obj, params);
-            webResult = new WebResult(200, "计算成功", invoke);
+            webResult = new WebResult(200, "计算成功，值为：" + invoke, invoke);
         } catch (Exception e) {
             e.printStackTrace();
             webResult = new WebResult(200, "计算出错，信息：" + e.getMessage(), null);
