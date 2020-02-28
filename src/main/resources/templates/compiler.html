@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>代码编辑器</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link th:href="@{/layui/css/layui.css}" rel="stylesheet" type="text/css"/>
+    <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+</head>
+<body>
+<form class="layui-form" action="">
+    <div class="layui-inline" style="margin-top: 20px">
+        <label class="layui-form-label">选择人员</label>
+        <div class="layui-input-inline">
+            <select id="selectSourceData" lay-verify="required" lay-search="">
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item" style="margin-top: 20px">
+        <label class="layui-form-label">选择参数</label>
+        <div class="layui-input-block" id="checkboxDiv">
+        </div>
+    </div>
+    <div class="layui-form-item layui-form-text" style="margin-top: 20px">
+        <label class="layui-form-label">输入伪代码</label>
+        <div class="layui-input-block">
+            <textarea placeholder="请输入内容" id="textareaData" class="layui-textarea"></textarea>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button type="submit" class="layui-btn" lay-submit="" lay-filter="checkForm">语法检查</button>
+            <button type="submit" class="layui-btn" lay-submit="" lay-filter="submitForm">计算结果</button>
+            <button type="reset" class="layui-btn layui-btn-primary" lay-filter="resetForm">重置</button>
+        </div>
+    </div>
+</form>
+
+<script th:src="@{/js/jquery.min.js}" type="text/javascript"></script>
+<script th:src="@{/layui/layui.js}" type="text/javascript"></script>
+<!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+<script>
+    layui.use(['form'], function(){
+        var form = layui.form;
+        var $ = layui.$;
+        getSourceData();
+
+        var dataArr = new Array();
+
+        function getSourceData(){
+            var getDataUrl = "/compiler/getSourceData.do";
+            $.ajax({
+                url: getDataUrl,
+                type: "GET",
+                success: function (data) {
+                    if (data.code == 200) {
+                        $("#selectSourceData").append(new Option("请选择", "choose"));
+                        $.each(data.data.sourceDataList, function (index, item) {
+                            $("#checkboxDiv").append("<input type='checkbox' name='" + item.dataName +
+                                "' title='" + item.dataName + "' value='" + item.id + "' lay-filter='selector'>");
+                        });
+                        $.each(data.data.userList, function (index, item) {
+                            $('#selectSourceData').append(new Option(item.realName, item.id));
+                        });
+                    } else {
+                        $("#selectSourceData").append(new Option("暂无数据", ""));
+                    }
+                    layui.form.render("checkbox");
+                    layui.form.render("select");
+                }
+            });
+        }
+
+        //复选框选中事件
+        form.on('checkbox(selector)', function(data){
+            var code = $("#textareaData").val();
+            if(data.elem.checked === true){
+                dataArr.push(data.value);
+                $("#textareaData").val(code + data.elem.name);
+            }else{
+                var index = dataArr.indexOf(data.value);
+                dataArr.splice(index, data.value);
+                $("#textareaData").val(code.replace(data.elem.name, ""));
+            }
+        });
+
+
+        //编译监听提交
+        form.on('submit(checkForm)', function(){
+            var submitUrl = "/compiler/compileSourceCode.do";
+            //获取textarea中的伪代码
+            var textareaData = $("#textareaData").val();
+            var ids = dataArr.join(',');
+            $.ajax({
+                url: submitUrl,
+                type: "POST",
+                data: {
+                    textareaData : textareaData,
+                    dataArr : ids,
+                },
+                success: function (result) {
+                    layer.msg(result.msg)
+                },
+                error: function (result) {
+                    layer.msg(result.msg);
+                }
+            });
+            return false;
+        });
+
+        //计算
+        form.on('submit(submitForm)', function(){
+            var submitUrl = "/compiler/calculationThisUser.do";
+            //获取textarea中的伪代码
+            var textareaData = $("#textareaData").val();
+            var ids = dataArr.join(',');
+            var userId = $("#selectSourceData").val();
+            $.ajax({
+                url: submitUrl,
+                type: "POST",
+                data: {
+                    textareaData : textareaData,
+                    dataArr : ids,
+                    userId : userId
+                },
+                success: function (result) {
+                    layer.msg(result.msg)
+                },
+                error: function (result) {
+                    layer.msg(result.msg);
+                }
+            });
+            return false;
+        });
+
+        //重置
+        form.on('submit(resetForm)', function(){
+            dataArr = [];
+            $("#selectSourceData").val('choose');
+            $("#textareaData").val('');
+            return false;
+        });
+    });
+
+</script>
+
+</body>
+</html>

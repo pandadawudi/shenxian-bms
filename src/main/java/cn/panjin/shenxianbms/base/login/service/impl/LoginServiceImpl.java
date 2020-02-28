@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
+import java.util.List;
 
 /**
  * <p>
@@ -94,5 +95,10 @@ public class LoginServiceImpl implements LoginService {
             return new WebResult(500, "注册失败", null);
         }
 
+    }
+
+    @Override
+    public List<BaseUser> getUserList() {
+        return baseUserMapper.getUserList();
     }
 }

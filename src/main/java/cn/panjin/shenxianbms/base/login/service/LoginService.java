@@ -1,8 +1,10 @@
 package cn.panjin.shenxianbms.base.login.service;
 
+import cn.panjin.shenxianbms.base.user.entity.BaseUser;
 import cn.panjin.shenxianbms.tool.web.WebResult;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * <p>
@@ -44,4 +46,6 @@ public interface LoginService {
      * @Since
      **/
     WebResult doRegister( String userName, String password, String realName, String phone, String email, String sex);
+
+    List<BaseUser> getUserList();
 }

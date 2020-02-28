@@ -51,4 +51,6 @@ public interface BaseUserMapper {
      * 用登陆账户查询人员信息
      */
     BaseUser getUserByLoginName(String loginName);
+
+    List<BaseUser> getUserList();
 }
