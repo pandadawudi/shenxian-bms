@@ -107,12 +107,50 @@ public class CompilerServiceImpl implements CompilerService {
             for (int i = 0; i < paramsVOList.size(); i++) {
                 args[i] = paramsVOList.get(i).getCl();
                 String sql = paramsVOList.get(i).getSql();
-                sql = sql.replace("{userId}", userId.toString());
+                sql = sql.replace("{userId}", userId.toString()).replace("{month}", "202002");
                 Object result = chooseGetFunction(paramsVOList.get(i).getCl(), sql);
                 params[i] = result;
             }
         }
         return eval.run("doCalculation", args, params, c);
+    }
+
+    /**
+     * 保存源数据
+     *
+     * @param dataName
+     * @param dataEnglishName
+     * @param dataType
+     * @param tableName
+     * @param fieldName
+     * @param dataSql
+     * @return
+     */
+    @Override
+    public WebResult saveSourceData(String dataName, String dataEnglishName, String dataType,
+                                    String tableName, String fieldName, String dataSql) {
+        SpcSourceData spcSourceData = new SpcSourceData();
+        spcSourceData.setDataName(dataName);
+        spcSourceData.setDataEnglishName(dataEnglishName);
+        spcSourceData.setDataType(dataType);
+        spcSourceData.setTableName(tableName);
+        spcSourceData.setFieldName(fieldName);
+        spcSourceData.setDataSql(dataSql);
+        spcSourceData.setDataStatus(1);
+        int count = spcSourceDataMapper.insert(spcSourceData);
+        return new WebResult(200, "保存成功", count);
+    }
+
+    /**
+     * 删除源数据
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public WebResult deleteSourceData(Long id) {
+        Integer count = spcSourceDataMapper.deleteByPrimaryKey(id);
+        return new WebResult(200, "删除成功", count);
     }
 
     /**

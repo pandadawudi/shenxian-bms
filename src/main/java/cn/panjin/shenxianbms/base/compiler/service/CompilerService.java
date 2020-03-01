@@ -20,4 +20,7 @@ public interface CompilerService {
     List<SpcSourceData> getSourceDataByStatus();
     WebResult compileSourceCode(String textareaData, String dataArr);
     WebResult calculationThisUser(String textareaData, String dataArr, Long userId);
+    WebResult saveSourceData(String dataName, String dataEnglishName, String dataType, String tableName,
+                             String fieldName, String dataSql);
+    WebResult deleteSourceData(Long id);
 }
