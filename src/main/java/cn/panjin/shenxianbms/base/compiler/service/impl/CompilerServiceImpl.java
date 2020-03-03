@@ -6,15 +6,19 @@ import cn.panjin.shenxianbms.base.compiler.entity.ParamsVO;
 import cn.panjin.shenxianbms.base.compiler.entity.SpcSourceData;
 import cn.panjin.shenxianbms.base.compiler.service.CompilerService;
 import cn.panjin.shenxianbms.base.user.dao.BaseUserMapper;
-import cn.panjin.shenxianbms.tool.calculator.Eval;
+import cn.panjin.shenxianbms.tool.dynamic.CodeAssemble;
+import cn.panjin.shenxianbms.tool.dynamic.CompileTool;
+import cn.panjin.shenxianbms.tool.dynamic.CustomClassLoader;
 import cn.panjin.shenxianbms.tool.web.WebResult;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
+import java.io.File;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,9 +41,7 @@ public class CompilerServiceImpl implements CompilerService {
     @Resource
     private BaseUserMapper baseUserMapper;
 
-    @Autowired
-    private Eval eval;
-
+    private static final String className = "cn.panjin.shenxianbms.tool.calculator.DynamicConstructionClass";
 
     @Override
     public List<SpcSourceData> getSourceDataByStatus() {
@@ -54,8 +56,8 @@ public class CompilerServiceImpl implements CompilerService {
      */
     @Override
     public WebResult compileSourceCode(String textareaData, String dataArr) {
-        Class<?> clazz = structureCompile(textareaData, dataArr);
-        if (clazz != null) {
+        boolean result = structureCompile(textareaData, dataArr);
+        if (result) {
             return new WebResult(200, "编译成功", null);
         } else {
             return new WebResult(500, "编译失败", null);
@@ -68,17 +70,16 @@ public class CompilerServiceImpl implements CompilerService {
      * @param textareaData 伪代码主体
      * @param dataArr      选择的源数据ID
      */
-    public Class<?> structureCompile(String textareaData, String dataArr) {
+    public boolean structureCompile(String textareaData, String dataArr) {
         String[] idArr = dataArr.split(",");
         //根据ID集合获取所有节点
         List<SpcSourceData> list = spcSourceDataMapper.getSourceDataByIds(idArr);
         //将中文名字置换为英文名字，作为参数
         ParamsListVO paramsListVO = replaceCode(list, textareaData);
-        String codes = eval.structureFunction(paramsListVO);
+        String codes = CodeAssemble.structureFunction(paramsListVO);
         System.out.println(codes);
-        String[] c = eval.structureClass(codes);
-        Class<?> clazz = eval.compile(c[0], c[1]);
-        return clazz;
+        String[] c = CodeAssemble.structureJavaFile(codes);
+        return CompileTool.compiledDynamic(c[0], c[1]);
     }
 
     /**
@@ -96,13 +97,13 @@ public class CompilerServiceImpl implements CompilerService {
         List<SpcSourceData> list = spcSourceDataMapper.getSourceDataByIds(idArr);
         //将中文名字置换为英文名字，作为参数
         ParamsListVO paramsListVO = replaceCode(list, textareaData);
-        String codes = eval.structureFunction(paramsListVO);
-        String[] c = eval.structureClass(codes);
+        String codes = CodeAssemble.structureFunction(paramsListVO);
+        String[] c = CodeAssemble.structureJavaFile(codes);
         //获取参数数据类型class
         List<ParamsVO> paramsVOList = paramsListVO.getList();
-        Class[] args = new Class[paramsVOList.size()];
+        Class[] args = new Class[paramsVOList == null ? 0 : paramsVOList.size()];
         //获取参数数组
-        Object[] params = new Object[paramsVOList.size()];
+        Object[] params = new Object[paramsVOList == null ? 0 : paramsVOList.size()];
         if (!CollectionUtils.isEmpty(paramsVOList)) {
             for (int i = 0; i < paramsVOList.size(); i++) {
                 args[i] = paramsVOList.get(i).getCl();
@@ -112,7 +113,13 @@ public class CompilerServiceImpl implements CompilerService {
                 params[i] = result;
             }
         }
-        return eval.run("doCalculation", args, params, c);
+        WebResult webResult = null;
+        try {
+            webResult = run("doCalculation", args, params, c);
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        return webResult;
     }
 
     /**
@@ -199,7 +206,7 @@ public class CompilerServiceImpl implements CompilerService {
                     paramsVO.setParamType(spcSourceData.getDataType());
                     paramsVO.setSql(spcSourceData.getDataSql());
                     //获取此参数类型class
-                    paramsVO.setCl(eval.getDateTypeClass(spcSourceData.getDataType()));
+                    paramsVO.setCl(getDateTypeClass(spcSourceData.getDataType()));
                     paramsVOList.add(paramsVO);
                 }
             }
@@ -207,5 +214,63 @@ public class CompilerServiceImpl implements CompilerService {
         }
         paramsListVO.setCode(code);
         return paramsListVO;
+    }
+
+    /**
+     * 根据数据类型获取该类型的class
+     */
+    public Class getDateTypeClass(String dataType) {
+        Class c = null;
+        try {
+            if ("BigDecimal".equals(dataType)) {
+                c = Class.forName("java.math." + dataType);
+            } else {
+                c = Class.forName("java.lang." + dataType);
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return c;
+    }
+
+    /**
+     * 创建对象、传入参数、并运行
+     *
+     * @param method 方法名称
+     * @param args   参数类型class数组
+     * @param params 参数值数组
+     * @return
+     */
+    public WebResult run(String method, Class[] args, Object[] params, String[] c) throws URISyntaxException {
+        WebResult webResult = null;
+        boolean result = CompileTool.compiledDynamic(c[0], c[1]);
+        Class<?> clazz = null;
+        if (result) {
+            File classPath = new File(Thread.currentThread().getContextClassLoader().getResource("").toURI());
+            String outDir = classPath.getAbsolutePath() + File.separator;
+            CustomClassLoader customClassLoader = new CustomClassLoader(outDir);
+            try {
+                clazz = customClassLoader.findClass(className);
+
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        } else {
+            webResult = new WebResult(500, "编译失败", null);
+        }
+        System.out.println(clazz.hashCode());
+        Object invoke = null;
+        try {
+            // 生成对象
+            Object obj = clazz.newInstance();
+            // 调用方法
+            Method m = clazz.getDeclaredMethod(method, args);
+            invoke = m.invoke(obj, params);
+            webResult = new WebResult(200, "计算成功，值为：" + invoke, invoke);
+        } catch (Exception e) {
+            e.printStackTrace();
+            webResult = new WebResult(200, "计算出错，信息：" + e.getMessage(), null);
+        }
+        return webResult;
     }
 }

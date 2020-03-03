@@ -1,4 +1,4 @@
-package cn.panjin.shenxianbms.tool.calculator;
+package cn.panjin.shenxianbms.tool.dynamic;
 
 import java.net.URI;
 import javax.tools.SimpleJavaFileObject;
