@@ -10,16 +10,24 @@ import cn.panjin.shenxianbms.tool.dynamic.CodeAssemble;
 import cn.panjin.shenxianbms.tool.dynamic.CompileTool;
 import cn.panjin.shenxianbms.tool.dynamic.CustomClassLoader;
 import cn.panjin.shenxianbms.tool.web.WebResult;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -160,6 +168,42 @@ public class CompilerServiceImpl implements CompilerService {
         return new WebResult(200, "删除成功", count);
     }
 
+    @Override
+    public void export(HttpServletRequest request, HttpServletResponse response) {
+        HSSFWorkbook wb = new HSSFWorkbook();//创建HSSFWorkbook对象
+        HSSFSheet sheet = wb.createSheet("导入模板");//建立sheet对象
+        HSSFRow row2 = sheet.createRow(0);
+        //创建单元格并设置单元格内容
+        row2.createCell(0).setCellValue("人员工号");
+        row2.createCell(1).setCellValue("SPC值/spc");
+        row2.createCell(2).setCellValue("SMC值/smc");
+        row2.createCell(3).setCellValue("NPS值/nps");
+        row2.createCell(4).setCellValue("备注/remark");
+
+        try {
+            //输出Excel文件
+            OutputStream output = response.getOutputStream();
+            response.reset();
+            String fileName = "wode";
+            //设置响应头
+            String agent = request.getHeader("USER-AGENT").toLowerCase();
+            response.setContentType("application/vnd.ms-excel");
+            String codedFileName = java.net.URLEncoder.encode(fileName, "UTF-8");
+            if (agent.contains("firefox")) {
+                response.setCharacterEncoding("utf-8");
+                response.setHeader("content-disposition", "attachment;filename=" + new String(fileName.getBytes(), "ISO8859-1") + ".xls" );
+            } else {
+                response.setHeader("content-disposition", "attachment;filename=" + codedFileName + ".xls");
+            }
+            wb.write(output);
+            output.close();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+
+
+    }
+
     /**
      * 根据传入的参数类型，mybatis使用不同的查询方法
      */
@@ -215,6 +259,11 @@ public class CompilerServiceImpl implements CompilerService {
         paramsListVO.setCode(code);
         return paramsListVO;
     }
+
+    public static void main(String[] args) {
+        System.out.println(new Date());
+    }
+
 
     /**
      * 根据数据类型获取该类型的class

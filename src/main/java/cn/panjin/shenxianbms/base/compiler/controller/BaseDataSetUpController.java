@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,5 +75,11 @@ public class BaseDataSetUpController {
     @ResponseBody
     public WebResult deleteSourceData(Long id){
         return compilerService.deleteSourceData(id);
+    }
+
+
+    @RequestMapping(value = "export.do", method = RequestMethod.GET)
+    public void export(HttpServletRequest request, HttpServletResponse response){
+        compilerService.export(request, response);
     }
 }
