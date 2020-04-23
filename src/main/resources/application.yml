@@ -3,9 +3,9 @@ server:
 
 spring:
   datasource:
-    url: jdbc:mysql://114.55.170.140:3306/xiuxian_bms?useUnicode=true&characterEncoding=utf8&useSSL=false
-    username: root
-    password: Qiudaoyu1100,
+    url: jdbc:mysql://192.168.254.79:5506/db_spc?useUnicode=true&characterEncoding=utf8&useSSL=false
+    username: mycat
+    password: IPY55QjNjv0I6e9t
     driver-class-name: com.mysql.jdbc.Driver
 
   jpa:
@@ -48,6 +48,10 @@ spring:
 
 mybatis:
   mapper-locations: classpath*:/mybatis/mapper/*/*Mapper.xml
+
+logging:
+  level:
+    cn.panjin.shenxianbms: debug
 
 #雪花算法配置的当前机器ID和序列号
 snow:

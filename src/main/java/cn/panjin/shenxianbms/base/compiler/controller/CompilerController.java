@@ -68,6 +68,7 @@ public class CompilerController {
 
     /**
      * 编译源代码
+     * 1.jdk加一个包：D:\Java\jdk\lib\tools.jar
      */
     @RequestMapping(value = "compileSourceCode.do", method = RequestMethod.POST)
     @ResponseBody
